@@ -56,6 +56,10 @@ class MyAppState extends State<MyApp> {
 
         log(' Output AsYouTypeFormatter ==>> $formattedNumber');
       }
+
+      var numberParsed =
+          await PhoneNumberUtil.parsePhoneNumber('9778424932', 'IN');
+      log('\n\n\n Output Parsed Number ==>> ${numberParsed.toString()} \n\n\n');
     } on PlatformException catch (e) {
       log('\n\n\n PLATFORM EXCEPTION: \n\n\n $e \n\n\n');
     }

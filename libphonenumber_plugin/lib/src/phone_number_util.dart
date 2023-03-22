@@ -64,4 +64,9 @@ class PhoneNumberUtil {
       String isoCode, PhoneNumberType type, PhoneNumberFormat format) async {
     return await _platform.getFormattedExampleNumber(isoCode, type, format);
   }
+
+  static Future<ParsedPhoneNumber?> parsePhoneNumber(
+      String phoneNumber, String isoCode) async {
+    return await _platform.parsePhoneNumber(phoneNumber, isoCode);
+  }
 }

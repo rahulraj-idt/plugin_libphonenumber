@@ -66,4 +66,11 @@ abstract class LibPhoneNumberPlatform extends PlatformInterface {
     throw UnimplementedError(
         'getFormattedExampleNumber() has not been implemented.');
   }
+
+  /// [parsePhoneNumber] tries to parse a phone number given a string representation.
+  /// Accepts [phoneNumber] and [isoCode], returns [ParsedPhoneNumber] if successful.
+  Future<ParsedPhoneNumber?> parsePhoneNumber(
+      String phoneNumber, String isoCode) async {
+    throw UnimplementedError('parsePhoneNumber() has not been implemented.');
+  }
 }

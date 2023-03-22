@@ -10,6 +10,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * LibphonenumberPlugin
@@ -38,7 +39,24 @@ class LibphonenumberPlugin : FlutterPlugin, MethodCallHandler {
       "formatAsYouType" -> handleFormatAsYouType(call, result)
       "getAllCountries" -> handleGetAllCountries(result)
       "getFormattedExampleNumber" -> handleGetFormattedExampleNumber(call, result)
+      "parse" -> handleParse(call, result)
       else -> result.notImplemented()
+    }
+  }
+
+  private fun handleParse(call: MethodCall, result: MethodChannel.Result) {
+    val phoneNumber = call.argument<String>("phoneNumber")
+    val isoCode = call.argument<String>("isoCode")
+    try {
+      val p = phoneUtil.parse(phoneNumber, isoCode);
+      val phoneNumberMap = HashMap<String, String>();
+      phoneNumberMap.put("countryCode", p.countryCode.toString());
+      phoneNumberMap.put("nationalNumber", p.nationalNumber.toString());
+      val normalized = phoneUtil.format(p, PhoneNumberFormat.E164);
+      phoneNumberMap.put("e164Format", normalized);
+      result.success(phoneNumberMap);
+    } catch (e: NumberParseException) {
+      result.error("NumberParseException", e.message, null);
     }
   }
 

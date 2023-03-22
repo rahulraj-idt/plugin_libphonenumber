@@ -84,4 +84,20 @@ class MethodChannelLibPhoneNumber extends LibPhoneNumberPlatform {
       'format': format.value,
     });
   }
+
+  @override
+  Future<ParsedPhoneNumber?> parsePhoneNumber(
+      String phoneNumber, String isoCode) async {
+    final Map<String, dynamic>? result = await methodChannel.invokeMapMethod(
+      'parse',
+      <String, dynamic>{
+        'phoneNumber': phoneNumber,
+        'isoCode': isoCode,
+      },
+    );
+    if (result == null) {
+      return null;
+    }
+    return ParsedPhoneNumber.fromJson(result);
+  }
 }
