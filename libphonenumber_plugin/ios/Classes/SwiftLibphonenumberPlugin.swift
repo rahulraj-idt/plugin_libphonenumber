@@ -36,11 +36,33 @@ public class SwiftLibphonenumberPlugin: NSObject, FlutterPlugin {
         case "getFormattedExampleNumber":
             getFormattedExampleNumber(call: call, result: result)
             break
+        case "parse":
+            parsePhoneNumber(call: call, result: result)
+            break
         default:
             result(FlutterMethodNotImplemented)
         }
     }
     
+    func parsePhoneNumber(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let arguments = call.arguments as! Dictionary<String, Any>
+        let phoneNumber = arguments["phoneNumber"] as! String
+        let isoCode = arguments["isoCode"] as! String
+        
+        do {
+            let p: PhoneNumber = try parsePhoneNumber(phoneNumber, withRegion: isoCode.uppercased())
+            let formatted: String = phoneNumberKit.format(p, toType: PhoneNumberFormat.e164)
+            let data: Dictionary<String, String> = [
+                "countryCode": String(p.countryCode),
+                "nationalNumber": String(p.nationalNumber),
+                "e164Format": formatted,
+                
+            ];
+            result(data)
+        } catch let error as NSError {
+            result(FlutterError(code: "\(error.code)", message: error.localizedDescription, details: nil))
+        }
+    }
     
     func isValidPhoneNumber(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
