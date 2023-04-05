@@ -13,9 +13,15 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
 
-  libphonenumber_platform_interface: ^0.4.0
+  libphonenumber_platform_interface:
+    git:
+      url: git@github.com:sakchhams/plugin_libphonenumber.git
+      path: libphonenumber_platform_interface
 
-  libphonenumber_web: ^0.3.0
+  libphonenumber_web:
+    git:
+      url: git@github.com:sakchhams/plugin_libphonenumber.git
+      path: libphonenumber_web
 
 dev_dependencies:
   flutter_lints: ^2.0.1
