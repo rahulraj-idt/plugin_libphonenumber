@@ -17,7 +17,7 @@ dependencies:
   js: ^0.6.5
   libphonenumber_platform_interface:
     git:
-      ref: idtm
+      ref: pi_v1
       url: git@github.com:sakchhams/plugin_libphonenumber.git
       path: libphonenumber_platform_interface
 
