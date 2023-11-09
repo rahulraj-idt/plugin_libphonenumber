@@ -98,6 +98,8 @@ class LibphonenumberPlugin : FlutterPlugin, MethodCallHandler {
       result.success(resultMap)
     } catch (e: NumberParseException) {
       result.error("NumberParseException", e.message, null)
+    } catch (e: Exception) {
+      result.error("UnexpectedException", e.message, null)
     }
   }
 
