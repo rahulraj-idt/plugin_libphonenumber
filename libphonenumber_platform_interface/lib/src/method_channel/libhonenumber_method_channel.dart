@@ -34,11 +34,15 @@ class MethodChannelLibPhoneNumber extends LibPhoneNumberPlatform {
   @override
   Future<Map<String, dynamic>?> getRegionInfo(
       String phoneNumber, String isoCode) async {
-    return await methodChannel
-        .invokeMapMethod('getRegionInfo', <String, dynamic>{
-      'phoneNumber': phoneNumber,
-      'isoCode': isoCode,
-    });
+    try {
+      return await methodChannel
+          .invokeMapMethod('getRegionInfo', <String, dynamic>{
+        'phoneNumber': phoneNumber,
+        'isoCode': isoCode,
+      });
+    } on PlatformException catch (e) {
+      throw ArgumentError('Unable to invoke getRegionInfo() ${e.message}');
+    }
   }
 
   /// [isValidPhoneNumber] checks if a [phoneNumber] is valid.
