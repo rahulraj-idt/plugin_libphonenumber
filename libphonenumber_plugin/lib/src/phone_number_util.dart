@@ -1,4 +1,5 @@
 import 'package:libphonenumber_platform_interface/libphonenumber_platform_interface.dart';
+import 'package:flutter/services.dart';
 
 /// A wrapper class [PhoneNumberUtil] that basically switch between plugin available for `Web` or `Android or IOS` and `Other platforms` when available.
 class PhoneNumberUtil {
@@ -30,10 +31,13 @@ class PhoneNumberUtil {
   /// Returns [Future<RegionInfo>] of all information available about the [phoneNumber]
   static Future<RegionInfo> getRegionInfo(
       String phoneNumber, String isoCode) async {
-    Map<String, dynamic>? response =
-        await _platform.getRegionInfo(phoneNumber, isoCode);
-
-    return RegionInfo.fromJson(response);
+    try {
+      Map<String, dynamic>? response =
+      await _platform.getRegionInfo(phoneNumber, isoCode);
+      return RegionInfo.fromJson(response);
+    } on PlatformException catch (e) {
+      return RegionInfo();
+    }
   }
 
   /// [getNumberType] get type of phone number
@@ -50,7 +54,11 @@ class PhoneNumberUtil {
   /// Returns [Future<String>]
   static Future<String?> formatAsYouType(
       String phoneNumber, String isoCode) async {
-    return await _platform.formatAsYouType(phoneNumber, isoCode);
+    try {
+      return await _platform.formatAsYouType(phoneNumber, isoCode);
+    } on PlatformException catch (e) {
+      return null;
+    }
   }
 
   /// [getAllCountries] Returns all regions the library has metadata for.
