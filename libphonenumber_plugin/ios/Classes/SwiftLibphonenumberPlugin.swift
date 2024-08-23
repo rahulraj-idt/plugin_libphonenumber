@@ -3,16 +3,16 @@ import UIKit
 import PhoneNumberKit
 
 public class SwiftLibphonenumberPlugin: NSObject, FlutterPlugin {
-    
-    let phoneNumberKit: PhoneNumberKit = PhoneNumberKit()
-    
+
+    let phoneNumberUtility = PhoneNumberUtility()
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugin.libphonenumber", binaryMessenger: registrar.messenger())
-        
+
         let instance = SwiftLibphonenumberPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "isValidPhoneNumber":
@@ -43,156 +43,156 @@ public class SwiftLibphonenumberPlugin: NSObject, FlutterPlugin {
             result(FlutterMethodNotImplemented)
         }
     }
-    
+
     func parsePhoneNumber(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
         let phoneNumber = arguments["phoneNumber"] as! String
         let isoCode = arguments["isoCode"] as! String
-        
+
         do {
             let p: PhoneNumber = try parsePhoneNumber(phoneNumber, withRegion: isoCode.uppercased())
-            let formatted: String = phoneNumberKit.format(p, toType: PhoneNumberFormat.e164)
+            let formatted: String = phoneNumberUtility.format(p, toType: PhoneNumberFormat.e164)
             let data: Dictionary<String, String> = [
                 "countryCode": String(p.countryCode),
                 "nationalNumber": String(p.nationalNumber),
                 "e164Format": formatted,
-                
+
             ];
             result(data)
         } catch let error as NSError {
             result(FlutterError(code: "\(error.code)", message: error.localizedDescription, details: nil))
         }
     }
-    
+
     func isValidPhoneNumber(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
         let phoneNumber = arguments["phoneNumber"] as! String
         let isoCode = arguments["isoCode"] as! String
-        
-        let isValid: Bool = phoneNumberKit.isValidPhoneNumber(phoneNumber, withRegion: isoCode.uppercased(), ignoreType: true)
-        
+
+        let isValid: Bool = phoneNumberUtility.isValidPhoneNumber(phoneNumber, withRegion: isoCode.uppercased(), ignoreType: true)
+
         result(isValid)
     }
-    
-    
+
+
     func normalizePhoneNumber(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
         let phoneNumber = arguments["phoneNumber"] as! String
         let isoCode = arguments["isoCode"] as! String
-        
+
         do {
             let p: PhoneNumber = try parsePhoneNumber(phoneNumber, withRegion: isoCode.uppercased(), ignoreType: true)
-            
-            let normalized: String = phoneNumberKit.format(p, toType: PhoneNumberFormat.e164)
-            
+
+            let normalized: String = phoneNumberUtility.format(p, toType: PhoneNumberFormat.e164)
+
             result(normalized)
         } catch let error as NSError {
             result(FlutterError(code: "\(error.code)", message: error.localizedDescription, details: nil))
         }
     }
-    
+
     func getRegionInfo(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
         let phoneNumber = arguments["phoneNumber"] as! String
         let isoCode = arguments["isoCode"] as! String
-        
+
         do {
-            
+
             let p: PhoneNumber = try parsePhoneNumber(phoneNumber, withRegion: isoCode.uppercased(), ignoreType: true)
-            
-            let regionCode: String? = phoneNumberKit.getRegionCode(of: p)
+
+            let regionCode: String? = phoneNumberUtility.getRegionCode(of: p)
             let countryCode: String?
-            
-            if let prefix = phoneNumberKit.countryCode(for: regionCode ?? "") {
+
+            if let prefix = phoneNumberUtility.countryCode(for: regionCode ?? "") {
                 countryCode = String(prefix)
             } else {
                 countryCode = nil
             }
-            
-            let formattedNumber: String? = phoneNumberKit.format(p, toType: PhoneNumberFormat.national)
-            
-            
+
+            let formattedNumber: String? = phoneNumberUtility.format(p, toType: PhoneNumberFormat.national)
+
+
             let data : Dictionary<String, String?> = ["isoCode": regionCode, "regionCode" : countryCode, "formattedPhoneNumber" : formattedNumber]
-            
+
             result(data)
         } catch let error as NSError {
             result(FlutterError(code: "\(error.code)", message: error.localizedDescription, details: nil))
         }
     }
-    
+
     func getNumberType(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
         let phoneNumber = arguments["phoneNumber"] as! String
         let isoCode = arguments["isoCode"] as! String
-        
+
         do {
             let p: PhoneNumber = try parsePhoneNumber(phoneNumber, withRegion: isoCode.uppercased(), ignoreType: false)
-            
+
             let t: PhoneNumberType = p.type
-            
+
             let index: Int = getIndexFor(phoneNumberType: t)
-            
+
             result(index)
         } catch let error as NSError {
             result(FlutterError(code: "\(error.code)", message: error.localizedDescription, details: nil))
         }
     }
-    
-    
+
+
     func formatAsYouType(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
         let phoneNumber = arguments["phoneNumber"] as! String
         let isoCode = arguments["isoCode"] as! String
-        
-        let partialFormatter: PartialFormatter = PartialFormatter(phoneNumberKit: phoneNumberKit, defaultRegion: isoCode.uppercased())
-        
+
+        let partialFormatter: PartialFormatter = PartialFormatter(utility: phoneNumberUtility, defaultRegion: isoCode.uppercased())
+
         let formattedNumber = partialFormatter.formatPartial(phoneNumber)
-        
+
         result(formattedNumber)
     }
-    
+
     func getAllCountries(call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let allCountries = phoneNumberKit.allCountries().filter {
+        let allCountries = phoneNumberUtility.allCountries().filter {
             $0.rangeOfCharacter(from: CharacterSet.letters.inverted) == nil
         }
-        
+
         result(allCountries)
     }
-    
+
     func getFormattedExampleNumber(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as! Dictionary<String, Any>
-        
+
         let isoCode = arguments["isoCode"] as! String
         let type = arguments["type"] as! Int
         let format = arguments["format"] as! Int
-        
+
         let phoneNumberType = getPhoneNumberTypeFor(index: type)
-        
+
         let phoneNumberFormat = getPhoneNumberFormatFor(index: format)
-        
-        let formattedExampleNumber = phoneNumberKit.getFormattedExampleNumber(forCountry: isoCode, ofType: phoneNumberType, withFormat: phoneNumberFormat, withPrefix: true)
-        
-        
+
+        let formattedExampleNumber = phoneNumberUtility.getFormattedExampleNumber(forCountry: isoCode, ofType: phoneNumberType, withFormat: phoneNumberFormat, withPrefix: true)
+
+
         result(formattedExampleNumber)
     }
 }
 
 public extension SwiftLibphonenumberPlugin {
-    
+
     private func parsePhoneNumber(_ phonenumber: String, withRegion regionCode: String, ignoreType: Bool = true) throws -> PhoneNumber {
         do {
-            let allSupportedCountries = phoneNumberKit.allCountries()
-            
+            let allSupportedCountries = phoneNumberUtility.allCountries()
+
             if (regionCode.isEmpty == false && allSupportedCountries.contains(regionCode)) {
-                return try phoneNumberKit.parse(phonenumber, withRegion: regionCode, ignoreType: ignoreType)
+                return try phoneNumberUtility.parse(phonenumber, withRegion: regionCode, ignoreType: ignoreType)
             } else {
-                return try phoneNumberKit.parse(phonenumber, ignoreType: ignoreType)
+                return try phoneNumberUtility.parse(phonenumber, ignoreType: ignoreType)
             }
         } catch {
           throw error
         }
     }
-    
+
     private func getIndexFor(phoneNumberFormat format: PhoneNumberFormat) -> Int {
         switch format {
         case .e164:
@@ -203,7 +203,7 @@ public extension SwiftLibphonenumberPlugin {
             return 2
         }
     }
-    
+
     private func getPhoneNumberFormatFor(index format: Int) -> PhoneNumberFormat {
         switch format {
         case 0:
@@ -216,7 +216,7 @@ public extension SwiftLibphonenumberPlugin {
             return .e164
         }
     }
-    
+
     private func getIndexFor(phoneNumberType type: PhoneNumberType) -> Int {
         switch type {
         case .fixedLine:
@@ -245,7 +245,7 @@ public extension SwiftLibphonenumberPlugin {
             return -1
         }
     }
-    
+
     private func getPhoneNumberTypeFor(index type: Int) -> PhoneNumberType {
         switch type {
         case 0:
